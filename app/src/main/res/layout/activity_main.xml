@@ -32,11 +32,11 @@
 
     <Button
         android:id="@+id/add_image"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_alignBottom="@+id/image_view"
-        android:layout_alignParentEnd="true"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:background="@drawable/add"
-        android:layout_alignStart="@+id/delete_image" />
+        android:layout_marginTop="16dp"
+        android:layout_below="@+id/image_view"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>

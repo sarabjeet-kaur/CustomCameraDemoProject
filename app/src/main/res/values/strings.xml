@@ -1,5 +1,15 @@
 <resources>
     <string name="app_name">CustomCameraDemoProject</string>
     <string name="select_image">Please Select Image</string>
+    <string name="none">None</string>
+    <string name="aqua">Aqua</string>
+    <string name="blackboard">Blackboard</string>
+    <string name="mono">Mono</string>
+    <string name="negative">Negative</string>
+    <string name="posterize">Posterize</string>
+    <string name="sepia">Sepia</string>
+    <string name="solarize">Solarize</string>
+    <string name="whiteboard">Whiteboard</string>
+    <string name="camera_error">camera cant be open, Please restart app</string>
 
 </resources>

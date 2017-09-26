@@ -10,18 +10,19 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.example.customcamerademoproject.utility.AppConstants;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class CropImage extends AppCompatActivity implements View.OnClickListener {
 
     private CropImageView mCropImageView;
     private Button save_crop, discard_crop, crop_image;
-    Bitmap cropped;
-    String mCurrentPhotoPath;
+    public String tag;
+    private FileOutputStream fos = null;
 
 
     @Override
@@ -32,92 +33,106 @@ public class CropImage extends AppCompatActivity implements View.OnClickListener
 
         initview();
         clickListener();
-        getImageFromIntent();
+
+
+        if (tag.equals("Gallery")) {
+            getImageFromGallery();
+        } else if (tag.equals("Camera")) {
+            getImageFromCamera();
+        }
 
     }
-
+    //initialise view
     private void initview() {
         mCropImageView = (CropImageView) findViewById(R.id.CropImageView);
         save_crop = (Button) findViewById(R.id.save_crop);
         discard_crop = (Button) findViewById(R.id.discard_crop);
         crop_image = (Button) findViewById(R.id.crop_image);
+
+        tag = getIntent().getStringExtra("tag");
+
     }
 
+    //method for clickListener
     private void clickListener() {
         save_crop.setOnClickListener(this);
         discard_crop.setOnClickListener(this);
         crop_image.setOnClickListener(this);
     }
 
-
-    private void getImageFromIntent() {
+//method for getting image from gallery to crop
+    private void getImageFromGallery() {
         String imagePath = getIntent().getStringExtra("image");
         mCropImageView.setImageBitmap(BitmapFactory.decodeFile(imagePath));
+    }
+    //method for getting image from camera to crop
+    private void getImageFromCamera() {
+        Log.e("camera image", CameraActivity.bitmap + "");
+        mCropImageView.setImageBitmap(CameraActivity.bitmap);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.save_crop:
-
                 Intent intent = new Intent(CropImage.this, MainActivity.class);
-                Log.e("cropped", cropped + "");
-                intent.putExtra("croppedImage", cropped);
-                getOutputMediaFile();
-                //savebitmap(getString(R.string.app_name), cropped);
+                Log.e("AppConstants.cropped", AppConstants.cropped + "");
                 startActivity(intent);
-
+                finish();
                 break;
             case R.id.discard_crop:
+                startActivity(new Intent(CropImage.this, MainActivity.class));
                 break;
             case R.id.crop_image:
                 onCropImageClick();
+                saveToInternalStorage(AppConstants.cropped);
+
                 break;
 
         }
     }
 
+   //method to crop image
     private void onCropImageClick() {
-        cropped = mCropImageView.getCroppedImage();
-        if (cropped != null)
-            mCropImageView.setImageBitmap(cropped);
+        AppConstants.cropped = mCropImageView.getCroppedImage();
+        if (AppConstants.cropped != null)
+            mCropImageView.setImageBitmap(AppConstants.cropped);
 
 
     }
+    //method to save cropped image to storage
+    private void saveToInternalStorage(final Bitmap bitmapImage) {
 
-/*    private void savebitmap(String filename, Bitmap bitmap) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                File directory = null;
+                try {
+                    File myFilename = new File(Environment.getExternalStorageDirectory().toString() + "/cropped images");
+                    if (!myFilename.exists()) {
+                        myFilename.mkdirs();
+                    }            // Create imageDir
+                    File mypath = new File(myFilename, "profile.jpg");
+                    fos = new FileOutputStream(mypath);
+                    // Use the compress method on the BitMap object to write image to the OutputStream
+                    bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        fos.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
 
-        try {
-            String file_path = Environment.getExternalStorageDirectory().getAbsolutePath() +
-                    "/PhysicsSketchpad";
-            File dir = new File(file_path);
-            if (!dir.exists())
-                dir.mkdirs();
-            File file = new File(dir, "sketchpad" + ".png");
-            file.createNewFile();
-            FileOutputStream fOut = new FileOutputStream(file);
-
-            bitmap.compress(Bitmap.CompressFormat.PNG, 85, fOut);
-            fOut.flush();
-            fOut.close();
-        } catch (Exception exp) {
-            exp.printStackTrace();
-        }
-
-
-    }*/
-
-    private File getOutputMediaFile() {
-         File mediaStorageDir = new File(Environment.getExternalStorageDirectory()
-                 + "/Android/data/"            + getApplicationContext().getPackageName()            + "/Files");
-        if (! mediaStorageDir.exists()){
-            if (! mediaStorageDir.mkdirs()){
-                return null;        }
-        }
-        // Create a media file name
-        String timeStamp = new SimpleDateFormat("ddMMyyyy_HHmm").format(new Date());
-        File mediaFile;
-        String mImageName="MI_"+ timeStamp +".jpg";
-         mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);
-        return mediaFile;}
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
+}

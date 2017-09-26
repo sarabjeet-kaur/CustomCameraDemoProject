@@ -8,24 +8,28 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.customcamerademoproject.utility.AppConstants;
+
+import java.io.File;
+
+import static com.example.customcamerademoproject.utility.AppConstants.REQUEST_OPEN_GALLERY;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private ImageView image_view;
     private Button add_image, delete_image;
-    public static final int REQUEST_OPEN_GALLERY = 2;
-    String mediaPath;
+    public String mediaPath;
 
 
     @Override
@@ -35,29 +39,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         initView();
         clickListener();
-        gettingCroppedImage();
-
 
     }
 
+    //initialise view
     private void initView() {
-
         image_view = (ImageView) findViewById(R.id.image_view);
         add_image = (Button) findViewById(R.id.add_image);
         delete_image = (Button) findViewById(R.id.delete_image);
-
     }
 
+    //method for clickListener
     private void clickListener() {
         add_image.setOnClickListener(this);
         delete_image.setOnClickListener(this);
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        gettingCroppedImage();
+
+    }
+
+    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.delete_image:
-                Glide.with(MainActivity.this).load(R.drawable.grey).skipMemoryCache(true).into(image_view);
+                deleteImage();
                 break;
             case R.id.add_image:
                 selectImage();
@@ -67,7 +76,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    public void selectImage() {
+    //Method for dialog chooser
+    private void selectImage() {
         final Dialog dialog = new Dialog(MainActivity.this);
         dialog.setContentView(R.layout.custom_chooser);
         ImageView select_camera = (ImageView) dialog.findViewById(R.id.select_camera);
@@ -75,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         select_camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //activeCamera();
+                startActivity(new Intent(MainActivity.this, CameraActivity.class));
                 dialog.dismiss();
 
             }
@@ -90,7 +100,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dialog.show();
     }
 
-    public void activeGallery() {
+
+    //method for open gallery
+    private void activeGallery() {
         if (ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this,
@@ -119,7 +131,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     mediaPath = cursor.getString(columnIndex);
                     Intent intent = new Intent(MainActivity.this, CropImage.class);
                     intent.putExtra("image", mediaPath);
-                    startActivityForResult(intent,100);
+                    intent.putExtra("tag", "Gallery");
+                    startActivityForResult(intent, 100);
 
 
                 } catch (Exception e) {
@@ -147,17 +160,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    //method for get cropped image from crop activity
     private void gettingCroppedImage() {
-        Intent intent=getIntent();
-        Bitmap bitmap=(Bitmap)intent.getParcelableExtra("croppedImage");
-        if(bitmap==null){
+        Bitmap bitmap = AppConstants.cropped;
+        if (bitmap == null) {
+            Glide.with(MainActivity.this).load(R.drawable.grey).skipMemoryCache(true).into(image_view);
+
+        } else {
+            image_view.setImageBitmap(bitmap);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        AppConstants.cropped = null;
+
+    }
+
+
+    //method for delete image from device
+    private void deleteImage() {
+        try {
+            File myFilename = new File(Environment.getExternalStorageDirectory().toString() + "/cropped images");
+            if (myFilename.exists()) {
+                File mypath = new File(myFilename, "profile.jpg");
+                if (mypath.exists())
+                    mypath.delete();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
             Glide.with(MainActivity.this).load(R.drawable.grey).skipMemoryCache(true).into(image_view);
 
         }
-        else {
-            image_view.setImageBitmap(bitmap);
 
-        }
-        Log.e("crop in main",bitmap+"");
     }
 }
