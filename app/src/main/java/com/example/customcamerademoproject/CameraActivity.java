@@ -17,7 +17,9 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     private static String TAG="CameraActivity";
     public static  Bitmap bitmap;
     private boolean isFilterOpen=false;
+    CameraPreview cameraPreview;
     private ImageView filterButton;
+    LinearLayout preview;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,8 +72,8 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         super.onResume();
         mCamera = getCameraInstance();
         if(mCamera!=null) {
-            final CameraPreview cameraPreview = new CameraPreview(CameraActivity.this, mCamera);
-            final LinearLayout preview=(LinearLayout)findViewById(R.id.camera_preview);
+             cameraPreview = new CameraPreview(CameraActivity.this, mCamera);
+             preview=(LinearLayout)findViewById(R.id.camera_preview);
             if (preview != null) {
 
                 CameraActivity.this.runOnUiThread(new Runnable() {
@@ -151,8 +153,16 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     protected void onPause() {
         super.onPause();
-        Log.e("camera activity","on pause");
-        mCamera.release();
+        if (mCamera != null) {
+            mCamera.stopPreview();
+            mCamera.release();        // release the camera for other applications
+            mCamera = null;
+        }
+        if (cameraPreview != null) {
+            LinearLayout preview = (LinearLayout) findViewById(R.id.camera_preview);
+            preview.removeView(cameraPreview);
+            cameraPreview = null;
+        }
     }
 
 

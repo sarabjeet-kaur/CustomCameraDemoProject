@@ -89,6 +89,7 @@ public class CropImage extends AppCompatActivity implements View.OnClickListener
                 break;
             case R.id.discard_crop:
                 startActivity(new Intent(CropImage.this, MainActivity.class));
+                finish();
                 break;
             case R.id.crop_image:
                 onCropImageClick();
