@@ -22,6 +22,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_camera);
 
 
         // Add a listener to the Capture button
@@ -40,11 +41,11 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     public  Camera getCameraInstance(){
         Camera c = null;
         try {
-            c = Camera.open();
+            mCamera = Camera.open();
         }
         catch (Exception e){
         }
-        return c;
+        return mCamera;
     }
 
 //camera call back
@@ -66,8 +67,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     protected void onResume() {
         Log.e("on","resume");
-       super.onResume();
-        setContentView(R.layout.activity_camera);
+        super.onResume();
         mCamera = getCameraInstance();
         if(mCamera!=null) {
             final CameraPreview cameraPreview = new CameraPreview(CameraActivity.this, mCamera);

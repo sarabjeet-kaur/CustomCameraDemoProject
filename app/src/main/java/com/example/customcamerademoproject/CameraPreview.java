@@ -127,7 +127,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         }
     }
 
-    /** Determine the space between the first two fingers */
     private float getFingerSpacing(MotionEvent event) {
         // ...
         float x = event.getX(0) - event.getX(1);
