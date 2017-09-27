@@ -1,10 +1,15 @@
 package com.example.customcamerademoproject;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -16,6 +21,8 @@ import com.theartofdev.edmodo.cropper.CropImageView;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
+import static com.example.customcamerademoproject.utility.AppConstants.REQUEST_SAVE_IMAGE;
 
 public class CropImage extends AppCompatActivity implements View.OnClickListener {
 
@@ -85,7 +92,15 @@ public class CropImage extends AppCompatActivity implements View.OnClickListener
                 break;
             case R.id.crop_image:
                 onCropImageClick();
-                saveToInternalStorage(AppConstants.cropped);
+                if (ContextCompat.checkSelfPermission(CropImage.this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(CropImage.this,
+                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                            REQUEST_SAVE_IMAGE);
+                } else {
+                    saveToInternalStorage(AppConstants.cropped);
+
+                }
 
                 break;
 
@@ -100,6 +115,23 @@ public class CropImage extends AppCompatActivity implements View.OnClickListener
 
 
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode==REQUEST_SAVE_IMAGE){
+            saveToInternalStorage(AppConstants.cropped);
+        }
+    }
+
     //method to save cropped image to storage
     private void saveToInternalStorage(final Bitmap bitmapImage) {
 

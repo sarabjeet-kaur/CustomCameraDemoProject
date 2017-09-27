@@ -9,4 +9,6 @@ import android.graphics.Bitmap;
 public class AppConstants {
     public static Bitmap cropped=null;
     public static final int REQUEST_OPEN_GALLERY = 2;
+    public static final int REQUEST_OPEN_CAMERA = 1;
+    public static final int REQUEST_SAVE_IMAGE = 3;
 }

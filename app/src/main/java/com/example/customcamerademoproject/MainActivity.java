@@ -24,6 +24,7 @@ import com.example.customcamerademoproject.utility.AppConstants;
 
 import java.io.File;
 
+import static com.example.customcamerademoproject.utility.AppConstants.REQUEST_OPEN_CAMERA;
 import static com.example.customcamerademoproject.utility.AppConstants.REQUEST_OPEN_GALLERY;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -85,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         select_camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, CameraActivity.class));
+                activeCamera();
                 dialog.dismiss();
 
             }
@@ -98,6 +99,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
         dialog.show();
+    }
+
+//method to open camera
+    private void activeCamera(){
+        if (ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.CAMERA},
+                    REQUEST_OPEN_CAMERA);
+        } else {
+            startActivity(new Intent(MainActivity.this, CameraActivity.class));
+        }
     }
 
 
@@ -157,6 +170,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_OPEN_GALLERY);
                 }
                 break;
+            case REQUEST_OPEN_CAMERA:
+                startActivity(new Intent(MainActivity.this, CameraActivity.class));
+
+                break;
+
         }
     }
 
